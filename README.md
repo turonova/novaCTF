@@ -6,4 +6,8 @@ _([doi.org/10.1016/j.jsb.2017.07.007](https://doi.org/10.1016/j.jsb.2017.07.007)
 <a href="https://doi.org/10.1016/j.jsb.2017.07.007" target="_blank">doi.org/10.1016/j.jsb.2017.07.007</a>
 
 
-The source code for NovaCTF is distributed under an LGPL license.
+The source code for NovaCTF is distributed under an LGPL license.  
+
+For more information how to install and use NovaCTF see Wiki pages.  
+
+In case of any problems or if you have feedback for use do not hesitate to write us (or open an issue here).
