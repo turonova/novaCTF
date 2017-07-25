@@ -5,7 +5,7 @@ _Turoňová, B., Schur, F.K.M, Wan, W. and Briggs, J.A.G. Efficient 3D-CTF corre
 _([doi.org/10.1016/j.jsb.2017.07.007](https://doi.org/10.1016/j.jsb.2017.07.007))_
 
 
-The source code for NovaCTF is distributed under an LGPL license.  
+The source code for NovaCTF is distributed under an GPL v.3 license.  
 
 For more information how to install and use NovaCTF see Wiki pages.  
 
