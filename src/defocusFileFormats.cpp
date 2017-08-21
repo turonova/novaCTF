@@ -345,7 +345,7 @@ void ImodCTFPlotter::writeWithShiftedDefocii(std::vector<std::vector<float>>& ne
 		// values are always computed for all defocii in the file and written out to avoid confusions
 		for(unsigned int j=0; j<valuesToChange; j++)
 		{
-			file << round(newValues[projIndex][j]);
+			file << round(newValues[projIndex][j]*conversionFactor);
 			file << " ";
 		}
 

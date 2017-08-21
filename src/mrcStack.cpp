@@ -87,6 +87,17 @@ using namespace std;
 					break;
 		}
 
+		if(mHeaderMRC.extra!=0)
+		{
+			extraData=new char[mHeaderMRC.extra];
+			mStackFile.seekg(sizeof(MRCHeader));
+			mStackFile.read(extraData, mHeaderMRC.extra);
+		}
+		else
+		{
+			extraData=new char[1];	//dummy
+		}
+
 		if(mKeepOpen)
 		{
 			mStackFile.seekg(sizeof(MRCHeader) + mHeaderMRC.extra);
@@ -99,6 +110,8 @@ using namespace std;
 	{
 		if(mKeepOpen)
 			mStackFile.close();
+
+		delete[] extraData;
 	}
 
 	void MRCStack::writeOutHeader()
@@ -280,6 +293,11 @@ using namespace std;
 	MRCHeader MRCStack::getStackHeader()
 	{
 		return mHeaderMRC;
+	}
+
+	char* MRCStack::getExtraData()
+	{
+		return extraData;
 	}
 
 	size_t MRCStack::getProjectionSize()

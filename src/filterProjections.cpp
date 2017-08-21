@@ -30,7 +30,7 @@ void FilterProjections::run()
 	initParameters();
 	filter();
 
-	VolumeIO::writeMRCStack(inputStack->getStackHeader(),filteredProjections,params.OutputFilename());
+	VolumeIO::writeMRCStack(inputStack->getStackHeader(),filteredProjections,params.OutputFilename(),inputStack->getExtraData());
 
 }
 

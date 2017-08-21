@@ -58,7 +58,7 @@ void CTFCorrection::correctCTF()
 		}
 	}
 
-	VolumeIO::writeMRCStack(inputStack->getStackHeader(),correctedProjections,params.OutputFilename());
+	VolumeIO::writeMRCStack(inputStack->getStackHeader(),correctedProjections,params.OutputFilename(),inputStack->getExtraData());
 
 }
 

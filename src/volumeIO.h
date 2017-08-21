@@ -26,8 +26,8 @@
         static void writeVolumeSliceInFloat(std::string outputVolumeFileName, float& data,  size_t sliceSize, int mode);
         static void convertVolumeValues(std::string outputVolumeFileName, float min, float max, float mean, int mode);
 
-        static void writeMRCStack(MRCHeader header, std::vector<float>& data, string outputName);
-        static void writeMRCStack(MRCHeader header, std::vector<std::vector< float > >& data, string outputName);
+        static void writeMRCStack(MRCHeader header, std::vector<float>& data, string outputName, char* extraData);
+        static void writeMRCStack(MRCHeader header, std::vector<std::vector< float > >& data, string outputName, char* extraData);
     protected:
 
         static void computeMinMaxMean(std::vector<float>& data, size_t dataSize, float& min, float& max, float& mean);

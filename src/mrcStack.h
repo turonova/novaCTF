@@ -33,12 +33,15 @@ public:
 
 	GeomHeader* getHeader();
 	MRCHeader getStackHeader();
+	char* getExtraData();
 
 	ifstream mStackFile;
 
 private:
 
 	MRCHeader mHeaderMRC;
+	char* extraData;
+
 	size_t mProjectionSize;
 	string mStackName;
 
@@ -60,4 +63,6 @@ private:
 	size_t mSizeOfVoxelType;
 
 	bool mKeepOpen;
+
+
 };

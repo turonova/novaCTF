@@ -12,7 +12,7 @@
 using namespace std;
 
 
-void VolumeIO::writeMRCStack(MRCHeader header, std::vector<std::vector<float>>& data, string outputName)
+void VolumeIO::writeMRCStack(MRCHeader header, std::vector<std::vector<float>>& data, string outputName, char* extraData)
 {
 	std::vector<float> linearData;
 	linearData.resize(data.size()*data[0].size());
@@ -27,10 +27,10 @@ void VolumeIO::writeMRCStack(MRCHeader header, std::vector<std::vector<float>>& 
 		}
 	}
 
-	writeMRCStack(header, linearData, outputName);
+	writeMRCStack(header, linearData, outputName,extraData);
 }
 
-void VolumeIO::writeMRCStack(MRCHeader header, std::vector<float>& data, string outputName)
+void VolumeIO::writeMRCStack(MRCHeader header, std::vector<float>& data, string outputName, char* extraData)
 {
 	std::ofstream outfile;
 
@@ -43,8 +43,15 @@ void VolumeIO::writeMRCStack(MRCHeader header, std::vector<float>& data, string 
 			throw new ExceptionFileOpen(outputName);
 		}
 
+		header.mode=2;
+		computeMinMaxMean(data,data.size(),header.dMin,header.dMax,header.dMean);
 
 		outfile.write(reinterpret_cast<char*>(&header), sizeof(MRCHeader));
+
+		if(header.extra!=0)
+		{
+			outfile.write(reinterpret_cast<char*>(extraData), header.extra);
+		}
 
 		writeProjections(outfile,data,header.nx*header.ny, header.nz);
 
