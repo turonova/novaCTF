@@ -133,21 +133,20 @@ void CTFFind4::writeWithShiftedDefocii(std::vector<std::vector<float>>& newValue
 
 		// Write out the first 1 value that correspond to tilt number
 		file << std::setprecision(6) << std::fixed << originalValues[projIndex][0];
-		file << "\t";
 
 		// Change both defocus values in the file (it does not matter if we correct for astigmatism or not, the shifted
 		// values are always computed for both defocii in the file and written out to avoid confusions
 		for(unsigned int j=0; j<2; j++)
 		{
-			file << std::setprecision(2) << std::fixed << newValues[projIndex][j]*conversionFactor;
 			file << "\t";
+			file << std::setprecision(2) << std::fixed << newValues[projIndex][j]*conversionFactor;
 		}
 
 		// Write out the rest of the original file values
 		for(unsigned int i=3; i<originalValues[projIndex].size(); i++)
 		{
-			file  << std::setprecision(6) << std::fixed << originalValues[projIndex][i];
 			file << "\t";
+			file  << std::setprecision(6) << std::fixed << originalValues[projIndex][i];
 		}
 
 		file << "\n";
@@ -337,23 +336,25 @@ void ImodCTFPlotter::writeWithShiftedDefocii(std::vector<std::vector<float>>& ne
 		// Write out the first 4 values that correspond to tilts and agles
 		for(unsigned int i=0; i<4; i++)
 		{
+			if(i!=0)
+				file << " ";
+
 			file << originalValues[projIndex][i];
-			file << " ";
 		}
 
 		// Change all defocus values in the file (it does not matter if we correct for astigmatism or not, the shifted
 		// values are always computed for all defocii in the file and written out to avoid confusions
 		for(unsigned int j=0; j<valuesToChange; j++)
 		{
-			file << round(newValues[projIndex][j]*conversionFactor);
 			file << " ";
+			file << round(newValues[projIndex][j]*conversionFactor);
 		}
 
 		// Write out the rest of the original file values
 		for(unsigned int i=4+valuesToChange; i<originalValues[projIndex].size(); i++)
 		{
-			file << originalValues[projIndex][i];
 			file << " ";
+			file << originalValues[projIndex][i];
 		}
 
 		file << "\n";

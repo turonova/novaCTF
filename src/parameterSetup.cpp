@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "parameterSetup.h"
+#include <algorithm>
 
 ParameterSetup::ParameterSetup()
 {
@@ -26,6 +27,12 @@ void separateNameAndValue(std::string& aLine, std::string& aParamName, std::stri
     aParamValue.clear();
 }
 
+std::string removeEmptySpacesFromString(string input)
+{
+	string output=input;
+	output.erase(std::remove(output.begin(), output.end(), ' '), output.end());
+	return output;
+}
 
 void parseDimensions2D(std::string& aParamValue,int& aX, int& aY, const char separator)
 {
@@ -219,7 +226,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "Algorithm")
 		{
-			algorithmType =  paramValue.c_str();
+			algorithmType =  removeEmptySpacesFromString(paramValue.c_str());
 		}
 		else if(paramName == "NumberOfInputStacks")
 		{
@@ -243,7 +250,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "DefocusFileFormat")
 		{
-			defocusFileFormat =  paramValue.c_str();
+			defocusFileFormat =  removeEmptySpacesFromString(paramValue.c_str());
 			if(defocusFileFormat!="ctffind4" && defocusFileFormat!="imod")
 				cout << "Unknown type of defocus file format: " << defocusFileFormat << endl;
 		}
@@ -257,7 +264,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "VolumeThicknessType")
 		{
-			string thicknessType = paramValue.c_str();
+			string thicknessType = removeEmptySpacesFromString(paramValue.c_str());
 			if(thicknessType=="maximal")
 				volumeThicknessType = novaCTF::VolumeThickness::MAXIMAL;
 			else if(thicknessType=="minimal")
@@ -292,7 +299,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "CorrectionType")
 		{
-			ctfCorrectionType=paramValue.c_str();
+			ctfCorrectionType=removeEmptySpacesFromString(paramValue.c_str());
 			if(ctfCorrectionType!="phaseflip" && ctfCorrectionType!="multiplication")
 				cout << "Unknown type of CTF correction: " << ctfCorrectionType << endl;
 		}
@@ -302,7 +309,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "StackOrientation")
 		{
-			string orientationType = paramValue.c_str();
+			string orientationType = removeEmptySpacesFromString(paramValue.c_str());
 			if(orientationType=="xy")
 				stackOrientation =  novaCTF::VolumeRotation::ALONG_XY;
 			else if(orientationType=="xz")
@@ -316,7 +323,8 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else
 		{
-			cout << "Ignoring following parameter: " << paramName << endl;
+			if(paramName!="")
+				cout << "Ignoring following parameter: " << paramName << endl;
 		}
 }
 
