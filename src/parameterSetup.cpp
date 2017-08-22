@@ -242,7 +242,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "DefocusFile")
 		{
-			defocusFile =  paramValue.c_str();
+			defocusFile =  removeEmptySpacesFromString(paramValue.c_str());
 		}
 		else if(paramName == "param")
 		{
