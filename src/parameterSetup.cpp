@@ -138,15 +138,15 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "OutputFile")
 		{
-			outputFilename = paramValue;
+			outputFilename = removeEmptySpacesFromString(paramValue);
 		}
 		else if(paramName == "InputProjections")
 		{
-			inputStackName = paramValue;
+			inputStackName = removeEmptySpacesFromString(paramValue);
 		}
 		else if(paramName == "TILTFILE")
 		{
-			tiltAnglesFilename = paramValue;
+			tiltAnglesFilename = removeEmptySpacesFromString(paramValue);
 		}
 		else if(paramName == "THICKNESS")
 		{
@@ -278,7 +278,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
 		}
 		else if(paramName == "DefocusShiftFile")
 		{
-			defocusShiftFile =  paramValue.c_str();
+			defocusShiftFile =  removeEmptySpacesFromString(paramValue.c_str());
 			useAdditionalShift = true;
 		}
 		else if(paramName == "MemoryLimit")
