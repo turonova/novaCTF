@@ -125,7 +125,7 @@ void VolumeIO::writeHeader(std::string inputStackFileName, std::string outputVol
         header.mz = volumeDimensions.y;
 
         //we go from stack to volume here - if the stack was binned we assume the same bin factor for z-dimension as well
-        header.cellDimY = volumeDimensions.z*scalingFactor;
+        header.cellDimY = (float)volumeDimensions.z*scalingFactor;
     }
     else //if (rotation==ALONG_XY)
     {
@@ -140,7 +140,7 @@ void VolumeIO::writeHeader(std::string inputStackFileName, std::string outputVol
         header.mz = volumeDimensions.z;
 
         //we go from stack to volume here - if the stack was binned we assume the same bin factor for z-dimension as well
-        header.cellDimZ = volumeDimensions.z*scalingFactor;
+        header.cellDimZ = (float)volumeDimensions.z*scalingFactor;
     }
 
     std::ofstream outfile;
