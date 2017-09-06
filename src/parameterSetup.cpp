@@ -29,391 +29,391 @@ void separateNameAndValue(std::string& aLine, std::string& aParamName, std::stri
 
 std::string removeEmptySpacesFromString(string input)
 {
-	string output=input;
-	output.erase(std::remove(output.begin(), output.end(), ' '), output.end());
-	return output;
+    string output=input;
+    output.erase(std::remove(output.begin(), output.end(), ' '), output.end());
+    return output;
 }
 
 void parseDimensions2D(std::string& aParamValue,int& aX, int& aY, const char separator)
 {
-	for(unsigned int i = 0; i < aParamValue.length(); i++)
-	    {
-	        if(aParamValue[i]==separator)
-	        {
-	            //do not want the space neither in name or value
-	            string tmpX = aParamValue.substr(0, i);
-	            string tmpY = aParamValue.substr(i+1, aParamValue.length());
-	            aX = atoi(tmpX.c_str());
-	            aY = atoi(tmpY.c_str());
-	            return;
-	        }
-	    }
+    for(unsigned int i = 0; i < aParamValue.length(); i++)
+    {
+        if(aParamValue[i]==separator)
+        {
+            //do not want the space neither in name or value
+            string tmpX = aParamValue.substr(0, i);
+            string tmpY = aParamValue.substr(i+1, aParamValue.length());
+            aX = atoi(tmpX.c_str());
+            aY = atoi(tmpY.c_str());
+            return;
+        }
+    }
 }
 
 void parseFloats(std::string& aParamValue,float& aX, float& aY, const char separator)
 {
-	for(unsigned int i = 0; i < aParamValue.length(); i++)
-	    {
-	        if(aParamValue[i]==separator)
-	        {
-	            //do not want the space neither in name or value
-	            string tmpX = aParamValue.substr(0, i);
-	            string tmpY = aParamValue.substr(i+1, aParamValue.length());
-	            aX = atof(tmpX.c_str());
-	            aY = atof(tmpY.c_str());
-	            return;
-	        }
-	    }
+    for(unsigned int i = 0; i < aParamValue.length(); i++)
+    {
+        if(aParamValue[i]==separator)
+        {
+            //do not want the space neither in name or value
+            string tmpX = aParamValue.substr(0, i);
+            string tmpY = aParamValue.substr(i+1, aParamValue.length());
+            aX = atof(tmpX.c_str());
+            aY = atof(tmpY.c_str());
+            return;
+        }
+    }
 }
 
 void ParameterSetup::parseComFile(const string tiltcom)
 {
 
-	std::string line;
-	 ifstream ifs(tiltcom.c_str());
+    std::string line;
+    ifstream ifs(tiltcom.c_str());
 
-	 if (!ifs)
-	 {
-		 cout << "Could not open following file: " << tiltcom.c_str() << endl;
-		 return;
-	 }
+    if (!ifs)
+    {
+        cout << "Could not open following file: " << tiltcom.c_str() << endl;
+        return;
+    }
 
-	 while(getline(ifs,line))
-	 {
-		if(line[0]!='#' && line[0]!='$')
-		{
-			//cout << "Processing following line:" << line << endl;
+    while(getline(ifs,line))
+    {
+        if(line[0]!='#' && line[0]!='$')
+        {
+            //cout << "Processing following line:" << line << endl;
 
-			string paramName;
-			string paramValue;
-			separateNameAndValue(line, paramName, paramValue);
-			storeValues(paramName,paramValue,' ');
-		}
-	 }
+            string paramName;
+            string paramValue;
+            separateNameAndValue(line, paramName, paramValue);
+            storeValues(paramName,paramValue,' ');
+        }
+    }
 }
 
 bool ParameterSetup::parameterWithoutValue(string paramName)
 {
-	bool paramWithoutValue = false;
+    bool paramWithoutValue = false;
 
-	if(paramName == "-PERPENDICULAR" || paramName == "-AdjustOrigin")
-	{
-		paramWithoutValue = true;
-	}
+    if(paramName == "-PERPENDICULAR" || paramName == "-AdjustOrigin")
+    {
+        paramWithoutValue = true;
+    }
 
-	return paramWithoutValue;
+    return paramWithoutValue;
 }
 
 void ParameterSetup::parseCommandLine(std::vector<string> argList)
 {
-	for(std::vector<string>::iterator it=argList.begin(); it!=argList.end();it++)
-	{
-		string paramName=*it;
-		string paramValue;
-		std::vector<string>::iterator nextArgument = it+1;
-		if(nextArgument!=argList.end() && !parameterWithoutValue(paramName))
-		{
-			paramValue=*nextArgument;
-			it++;
-		}
-		else if(!parameterWithoutValue(paramName))
-		{
-			cout << "Missing value of the following parameter: " << *it << endl;
-			return;
-		}
+    for(std::vector<string>::iterator it=argList.begin(); it!=argList.end();it++)
+    {
+        string paramName=*it;
+        string paramValue;
+        std::vector<string>::iterator nextArgument = it+1;
+        if(nextArgument!=argList.end() && !parameterWithoutValue(paramName))
+        {
+            paramValue=*nextArgument;
+            it++;
+        }
+        else if(!parameterWithoutValue(paramName))
+        {
+            cout << "Missing value of the following parameter: " << *it << endl;
+            return;
+        }
 
-		//if(paramName!="tilt.com")
-		{
-			paramName.erase(0,1); //erase "-" at the beginning of command line arguments
-			storeValues(paramName,paramValue,',');
-		}
-	}
+        //if(paramName!="tilt.com")
+        {
+            paramName.erase(0,1); //erase "-" at the beginning of command line arguments
+            storeValues(paramName,paramValue,',');
+        }
+    }
 }
 
 void ParameterSetup::storeValues(string paramName, string paramValue, char separator)
 {
-		if(paramName == "IMAGEBINNED")
-		{
-			binning = atoi(paramValue.c_str());
-		}
-		else if(paramName == "OutputFile")
-		{
-			outputFilename = removeEmptySpacesFromString(paramValue);
-		}
-		else if(paramName == "InputProjections")
-		{
-			inputStackName = removeEmptySpacesFromString(paramValue);
-		}
-		else if(paramName == "TILTFILE")
-		{
-			tiltAnglesFilename = removeEmptySpacesFromString(paramValue);
-		}
-		else if(paramName == "THICKNESS")
-		{
-			depth = atoi(paramValue.c_str());
-		}
-		else if(paramName == "XAXISTILT")
-		{
-			xAxisTilt = atof(paramValue.c_str());
-			if(xAxisTilt!=0.0)
-			{
-				cout << "WARNING: novaCTF currently does not support non-zero x-tilt!!!" << endl;
-				cout << "\t\t The x-tilt will be set to zero!!!" << endl;
-				xAxisTilt = 0.0f;
-			}
-		}
-		else if(paramName == "FULLIMAGE")
-		{
-			//width and height before binning. Will be divided at the end of parseComFile function.
-			int tempW;
-			int tempH;
-			parseDimensions2D(paramValue, tempW, tempH, separator);
-			width=(unsigned int) tempW;
-			height=(unsigned int) tempH;
-		}
-		else if((paramName == "EXCLUDELIST") || (paramName == "EXCLUDELIST2"))
-		{
-			if(!skipProjectionsList.empty())
-			{
-				skipProjectionsList+=",";
-			}
-			skipProjectionsList +=paramValue;
-		}
-		else if(paramName == "SUBSETSTART")
-		{
-			parseDimensions2D(paramValue,subsetWidth, subsetHeight ,separator);
-		}
-		else if (paramName == "SHIFT")
-		{
-			parseDimensions2D(paramValue,zShiftX,zShiftY,separator);
-		}
-		else if(paramName == "MODE")
-		{
-			outputMode = atoi(paramValue.c_str());
-		}
-		else if (paramName == "RADIAL")
-		{
-			useRadialFilter = true;
-			parseFloats(paramValue,radialCutOff,radialFallOff,separator);
-		}
-		else if (paramName == "SCALE")
-		{
-			parseFloats(paramValue,scalingOffset,scaling,separator);
-			if(scaling!=1.0 || scalingOffset!=0.0)
-				useScaling = true;
-		}
-		else if (paramName == "OFFSET")
-		{
-			if(paramValue.find(separator)!=string::npos)
-			{
-				parseFloats(paramValue,offset.x,offset.y,separator);
-			}
-			else
-			{
-				offset.x = atof(paramValue.c_str());
-				offset.y = 0.0f;
-			}
-		}
-		else if(paramName == "WIDTH")
-		{
-			width = atoi(paramValue.c_str());
-		}
-		else if(paramName == "LOG")
-		{
-			logarithmizeData = true;
-			cout << "WARNING: novaCTF currently does not support logarithmic scaling of densities!!!" << endl;
-			cout << "\t\t If you wish to apply this scaling prior the reconstruction use clip function from IMOD (should be applied before the filtering)!" << endl;
-		}
-		else if(paramName == "Algorithm")
-		{
-			algorithmType =  removeEmptySpacesFromString(paramValue.c_str());
-		}
-		else if(paramName == "NumberOfInputStacks")
-		{
-			numberOfInputStacks =  atoi(paramValue.c_str());
-		}
-		else if(paramName == "CorrectAstigmatism")
-		{
-			correctAstigmatism = atoi(paramValue.c_str());
-		}
-		else if(paramName == "WriteOutDefocusSlices")
-		{
-			writeOutDefocusSlices = atoi(paramValue.c_str());
-		}
-		else if(paramName == "DefocusFile")
-		{
-			defocusFile =  removeEmptySpacesFromString(paramValue.c_str());
-		}
-		else if(paramName == "param")
-		{
-			// do nothing, it was already processed
-		}
-		else if(paramName == "DefocusFileFormat")
-		{
-			defocusFileFormat =  removeEmptySpacesFromString(paramValue.c_str());
-			if(defocusFileFormat!="ctffind4" && defocusFileFormat!="imod")
-				cout << "Unknown type of defocus file format: " << defocusFileFormat << endl;
-		}
-		else if(paramName == "PixelSize")
-		{
-			pixelSize = atof(paramValue.c_str());
-		}
-		else if(paramName=="Use3DCTF")
-		{
-			use3DCTF=atoi(paramValue.c_str());
-		}
-		else if(paramName == "VolumeThicknessType")
-		{
-			string thicknessType = removeEmptySpacesFromString(paramValue.c_str());
-			if(thicknessType=="maximal")
-				volumeThicknessType = novaCTF::VolumeThickness::MAXIMAL;
-			else if(thicknessType=="minimal")
-				volumeThicknessType = novaCTF::VolumeThickness::MINIMAL;
-			else
-				cout << "Unknown type of volume thickness: " << thicknessType << endl;
-		}
-		else if(paramName == "FilterProjections")
-		{
-			filterProjections=atoi(paramValue.c_str());
-		}
-		else if(paramName == "DefocusShiftFile")
-		{
-			defocusShiftFile =  removeEmptySpacesFromString(paramValue.c_str());
-			useAdditionalShift = true;
-		}
-		else if(paramName == "MemoryLimit")
-		{
-			memoryLimit=atof(paramValue.c_str());
-		}
-		else if(paramName == "AmplitudeContrast")
-		{
-			amplitude=atof(paramValue.c_str());
-		}
-		else if(paramName == "Cs")
-		{
-			cs=atof(paramValue.c_str());
-		}
-		else if(paramName == "Volt")
-		{
-			evk=atof(paramValue.c_str());
-		}
-		else if(paramName == "CorrectionType")
-		{
-			ctfCorrectionType=removeEmptySpacesFromString(paramValue.c_str());
-			if(ctfCorrectionType!="phaseflip" && ctfCorrectionType!="multiplication")
-				cout << "Unknown type of CTF correction: " << ctfCorrectionType << endl;
-		}
-		else if(paramName == "KeepFilesOpen")
-		{
-			keepFilesOpen =  atoi(paramValue.c_str());
-		}
-		else if(paramName == "StackOrientation")
-		{
-			string orientationType = removeEmptySpacesFromString(paramValue.c_str());
-			if(orientationType=="xy")
-				stackOrientation =  novaCTF::VolumeRotation::ALONG_XY;
-			else if(orientationType=="xz")
-				stackOrientation =  novaCTF::VolumeRotation::ALONG_XZ;
-			else
-				cout << "Unknown type of stack orientation: " << orientationType << endl;
-		}
-		else if(paramName == "DefocusStep")
-		{
-			defocusStep = atof(paramValue.c_str());
-		}
-		else
-		{
-			if(paramName!="")
-				cout << "Ignoring following parameter: " << paramName << endl;
-		}
+    if(paramName == "IMAGEBINNED")
+    {
+        binning = atoi(paramValue.c_str());
+    }
+    else if(paramName == "OutputFile")
+    {
+        outputFilename = removeEmptySpacesFromString(paramValue);
+    }
+    else if(paramName == "InputProjections")
+    {
+        inputStackName = removeEmptySpacesFromString(paramValue);
+    }
+    else if(paramName == "TILTFILE")
+    {
+        tiltAnglesFilename = removeEmptySpacesFromString(paramValue);
+    }
+    else if(paramName == "THICKNESS")
+    {
+        depth = atoi(paramValue.c_str());
+    }
+    else if(paramName == "XAXISTILT")
+    {
+        xAxisTilt = atof(paramValue.c_str());
+        if(xAxisTilt!=0.0)
+        {
+            cout << "WARNING: novaCTF currently does not support non-zero x-tilt!!!" << endl;
+            cout << "\t\t The x-tilt will be set to zero!!!" << endl;
+            xAxisTilt = 0.0f;
+        }
+    }
+    else if(paramName == "FULLIMAGE")
+    {
+        //width and height before binning. Will be divided at the end of parseComFile function.
+        int tempW;
+        int tempH;
+        parseDimensions2D(paramValue, tempW, tempH, separator);
+        width=(unsigned int) tempW;
+        height=(unsigned int) tempH;
+    }
+    else if((paramName == "EXCLUDELIST") || (paramName == "EXCLUDELIST2"))
+    {
+        if(!skipProjectionsList.empty())
+        {
+            skipProjectionsList+=",";
+        }
+        skipProjectionsList +=paramValue;
+    }
+    else if(paramName == "SUBSETSTART")
+    {
+        parseDimensions2D(paramValue,subsetWidth, subsetHeight ,separator);
+    }
+    else if (paramName == "SHIFT")
+    {
+        parseDimensions2D(paramValue,zShiftX,zShiftY,separator);
+    }
+    else if(paramName == "MODE")
+    {
+        outputMode = atoi(paramValue.c_str());
+    }
+    else if (paramName == "RADIAL")
+    {
+        useRadialFilter = true;
+        parseFloats(paramValue,radialCutOff,radialFallOff,separator);
+    }
+    else if (paramName == "SCALE")
+    {
+        parseFloats(paramValue,scalingOffset,scaling,separator);
+        if(scaling!=1.0 || scalingOffset!=0.0)
+            useScaling = true;
+    }
+    else if (paramName == "OFFSET")
+    {
+        if(paramValue.find(separator)!=string::npos)
+        {
+            parseFloats(paramValue,offset.x,offset.y,separator);
+        }
+        else
+        {
+            offset.x = atof(paramValue.c_str());
+            offset.y = 0.0f;
+        }
+    }
+    else if(paramName == "WIDTH")
+    {
+        width = atoi(paramValue.c_str());
+    }
+    else if(paramName == "LOG")
+    {
+        logarithmizeData = true;
+        cout << "WARNING: novaCTF currently does not support logarithmic scaling of densities!!!" << endl;
+        cout << "\t\t If you wish to apply this scaling prior the reconstruction use clip function from IMOD (should be applied before the filtering)!" << endl;
+    }
+    else if(paramName == "Algorithm")
+    {
+        algorithmType =  removeEmptySpacesFromString(paramValue.c_str());
+    }
+    else if(paramName == "NumberOfInputStacks")
+    {
+        numberOfInputStacks =  atoi(paramValue.c_str());
+    }
+    else if(paramName == "CorrectAstigmatism")
+    {
+        correctAstigmatism = atoi(paramValue.c_str());
+    }
+    else if(paramName == "WriteOutDefocusSlices")
+    {
+        writeOutDefocusSlices = atoi(paramValue.c_str());
+    }
+    else if(paramName == "DefocusFile")
+    {
+        defocusFile =  removeEmptySpacesFromString(paramValue.c_str());
+    }
+    else if(paramName == "param")
+    {
+        // do nothing, it was already processed
+    }
+    else if(paramName == "DefocusFileFormat")
+    {
+        defocusFileFormat =  removeEmptySpacesFromString(paramValue.c_str());
+        if(defocusFileFormat!="ctffind4" && defocusFileFormat!="imod")
+            cout << "Unknown type of defocus file format: " << defocusFileFormat << endl;
+    }
+    else if(paramName == "PixelSize")
+    {
+        pixelSize = atof(paramValue.c_str());
+    }
+    else if(paramName=="Use3DCTF")
+    {
+        use3DCTF=atoi(paramValue.c_str());
+    }
+    else if(paramName == "VolumeThicknessType")
+    {
+        string thicknessType = removeEmptySpacesFromString(paramValue.c_str());
+        if(thicknessType=="maximal")
+            volumeThicknessType = novaCTF::VolumeThickness::MAXIMAL;
+        else if(thicknessType=="minimal")
+            volumeThicknessType = novaCTF::VolumeThickness::MINIMAL;
+        else
+            cout << "Unknown type of volume thickness: " << thicknessType << endl;
+    }
+    else if(paramName == "FilterProjections")
+    {
+        filterProjections=atoi(paramValue.c_str());
+    }
+    else if(paramName == "DefocusShiftFile")
+    {
+        defocusShiftFile =  removeEmptySpacesFromString(paramValue.c_str());
+        useAdditionalShift = true;
+    }
+    else if(paramName == "MemoryLimit")
+    {
+        memoryLimit=atof(paramValue.c_str());
+    }
+    else if(paramName == "AmplitudeContrast")
+    {
+        amplitude=atof(paramValue.c_str());
+    }
+    else if(paramName == "Cs")
+    {
+        cs=atof(paramValue.c_str());
+    }
+    else if(paramName == "Volt")
+    {
+        evk=atof(paramValue.c_str());
+    }
+    else if(paramName == "CorrectionType")
+    {
+        ctfCorrectionType=removeEmptySpacesFromString(paramValue.c_str());
+        if(ctfCorrectionType!="phaseflip" && ctfCorrectionType!="multiplication")
+            cout << "Unknown type of CTF correction: " << ctfCorrectionType << endl;
+    }
+    else if(paramName == "KeepFilesOpen")
+    {
+        keepFilesOpen =  atoi(paramValue.c_str());
+    }
+    else if(paramName == "StackOrientation")
+    {
+        string orientationType = removeEmptySpacesFromString(paramValue.c_str());
+        if(orientationType=="xy")
+            stackOrientation =  novaCTF::VolumeRotation::ALONG_XY;
+        else if(orientationType=="xz")
+            stackOrientation =  novaCTF::VolumeRotation::ALONG_XZ;
+        else
+            cout << "Unknown type of stack orientation: " << orientationType << endl;
+    }
+    else if(paramName == "DefocusStep")
+    {
+        defocusStep = atof(paramValue.c_str());
+    }
+    else
+    {
+        if(paramName!="")
+            cout << "Ignoring following parameter: " << paramName << endl;
+    }
 }
 
 void ParameterSetup::initVariables()
 {
-	width = 0;
-	height = 0;
-	depth = 0; 				//output volume dimensions AFTER binning
-	binning = 1;
+    width = 0;
+    height = 0;
+    depth = 0;          //output volume dimensions AFTER binning
+    binning = 1;
 
-	subsetWidth = 0;		//can be also negative according to eTomo specification
-	subsetHeight = 0;		//can be also negative according to eTomo specification
-	zShiftX = 0;
-	zShiftY = 0;
+    subsetWidth = 0;    //can be also negative according to eTomo specification
+    subsetHeight = 0;   //can be also negative according to eTomo specification
+    zShiftX = 0;
+    zShiftY = 0;
 
-	offset.x = 0.0f;
-	offset.y = 0.0f;
+    offset.x = 0.0f;
+    offset.y = 0.0f;
 
-	logarithmizeData = false;
+    logarithmizeData = false;
 
-	algorithmType = "none";
+    algorithmType = "none";
 
-	defocusFileFormat = "imod";
-	writeOutDefocusSlices = 0;
-	volumeThicknessType = novaCTF::VolumeThickness::MAXIMAL;
-	correctAstigmatism = false;
+    defocusFileFormat = "imod";
+    writeOutDefocusSlices = 0;
+    volumeThicknessType = novaCTF::VolumeThickness::MAXIMAL;
+    correctAstigmatism = false;
 
-	useRadialFilter = false;
-	radialCutOff = 0.0f;
-	radialFallOff = 0.0f;
+    useRadialFilter = false;
+    radialCutOff = 0.0f;
+    radialFallOff = 0.0f;
 
-	use3DCTF = true;
+    use3DCTF = true;
 
-	filterProjections = true;
-	useAdditionalShift = false;
-	defocusStep = 0.0f;
-	numberOfInputStacks = 0;
+    filterProjections = true;
+    useAdditionalShift = false;
+    defocusStep = 0.0f;
+    numberOfInputStacks = 0;
 
-	scalingOffset = 0.0f;
-	scaling = 1.0;
+    scalingOffset = 0.0f;
+    scaling = 1.0;
 
-	stackOrientation = novaCTF::VolumeRotation::ALONG_XY;
+    stackOrientation = novaCTF::VolumeRotation::ALONG_XY;
 
-	keepFilesOpen = true;
+    keepFilesOpen = true;
 
-	ctfCorrectionType = "phaseflip";
-	memoryLimit=0;
+    ctfCorrectionType = "phaseflip";
+    memoryLimit=0;
 
-	xAxisTilt = 0.0f;
-	outputMode = 2;
+    xAxisTilt = 0.0f;
+    outputMode = 2;
 }
 
 ParameterSetup::ParameterSetup(std::vector<string> argList)
 {
-	initVariables();
+    initVariables();
 
-	//check if tilt.com is among the parameters and if so parse it first - the command line parameters have more priority and can later on change any parameters set by tilt.com
-	for(std::vector<string>::iterator it=argList.begin(); it!=argList.end();it++)
-	{
-		if((*it)=="-param")
-		{
-			std::vector<string>::iterator nextArgument = it+1;
-			cout << "Parsing the following parameter file: " << *nextArgument << endl;
-			parseComFile((*nextArgument));
-		}
-	}
+    //check if tilt.com is among the parameters and if so parse it first - the command line parameters have more priority and can later on change any parameters set by tilt.com
+    for(std::vector<string>::iterator it=argList.begin(); it!=argList.end();it++)
+    {
+        if((*it)=="-param")
+        {
+            std::vector<string>::iterator nextArgument = it+1;
+            cout << "Parsing the following parameter file: " << *nextArgument << endl;
+            parseComFile((*nextArgument));
+        }
+    }
 
-	parseCommandLine(argList);
+    parseCommandLine(argList);
 
-	if(!skipProjectionsList.empty())
-	{
-		skipProjections = skipProjectionsList;
-	}
+    if(!skipProjectionsList.empty())
+    {
+        skipProjections = skipProjectionsList;
+    }
 
-	if(binning!=0)
-	{
-		width = width / binning;
-		height = height / binning;
-		depth = depth / binning;
+    if(binning!=0)
+    {
+        width = width / binning;
+        height = height / binning;
+        depth = depth / binning;
 
-		subsetWidth = subsetWidth / binning;		// usually zero and not cleared at all how it is computed within imod (not really set via etomo)
-		subsetHeight = subsetHeight / binning;
+        subsetWidth = subsetWidth / binning;		// usually zero and not cleared at all how it is computed within imod (not really set via etomo)
+        subsetHeight = subsetHeight / binning;
 
-		zShift.x = (float)(zShiftX/binning);
-		zShift.y = (float)(zShiftY/binning);		//actually shift in Z direction
-	}
+        zShift.x = (float)(zShiftX/binning);
+        zShift.y = (float)(zShiftY/binning);		//actually shift in Z direction
+    }
 
-	volumeDimensions = novaCTF::Vec3ui(width,height,depth);
-	subsetStart=novaCTF::Vec2i(subsetWidth,subsetHeight);
+    volumeDimensions = novaCTF::Vec3ui(width,height,depth);
+    subsetStart=novaCTF::Vec2i(subsetWidth,subsetHeight);
 }
 
 ParameterSetup::~ParameterSetup()
@@ -421,192 +421,192 @@ ParameterSetup::~ParameterSetup()
 
 novaCTF::Vec3ui ParameterSetup::VolumeDimensions()
 {
-	return volumeDimensions;
+    return volumeDimensions;
 }
 
 string ParameterSetup::InputStackName()
 {
-	return inputStackName;
+    return inputStackName;
 }
 
 string ParameterSetup::TiltAnglesFilename()
 {
-	return tiltAnglesFilename;
+    return tiltAnglesFilename;
 }
 
 string ParameterSetup::OutputFilename()
 {
-	return outputFilename;
+    return outputFilename;
 }
 
 float ParameterSetup::XAxisTilt()
 {
-	return xAxisTilt;
+    return xAxisTilt;
 }
 
 novaCTF::Vec2f ParameterSetup::Offset()
 {
-	return offset;
+    return offset;
 }
 
 string ParameterSetup::SkipProjections()
 {
-	return skipProjections;
+    return skipProjections;
 }
 
 novaCTF::Vec2f ParameterSetup::ZShift()
 {
-	return zShift;
+    return zShift;
 }
 
 novaCTF::Vec2i ParameterSetup::SubsetStart()
 {
-	return subsetStart;
+    return subsetStart;
 }
 
 unsigned int ParameterSetup::OutputMode()
 {
-	return outputMode;
+    return outputMode;
 }
 
 bool ParameterSetup::UseRadialFilter()
 {
-	return useRadialFilter;
+    return useRadialFilter;
 }
 
 bool ParameterSetup::LogarithmizeData()
 {
-	return logarithmizeData;
+    return logarithmizeData;
 }
 
 novaCTF::VolumeThickness ParameterSetup::VolumeThicknessType()
 {
-	return volumeThicknessType;
+    return volumeThicknessType;
 }
 
 bool ParameterSetup::UseScaling()
 {
-	return useScaling;
+    return useScaling;
 }
 
 float ParameterSetup::RadialCutOff()
 {
-	return radialCutOff;
+    return radialCutOff;
 }
 
 float ParameterSetup::RadialFallOff()
 {
-	return radialFallOff;
+    return radialFallOff;
 }
 
 float ParameterSetup::Scaling()
 {
-	return scaling;
+    return scaling;
 }
 
 float ParameterSetup::PixelSize()
 {
-	return pixelSize;
+    return pixelSize;
 }
 
 string ParameterSetup::Algorithm()
 {
-	return algorithmType;
+    return algorithmType;
 }
 
 float ParameterSetup::ScalingOffset()
 {
-	return scalingOffset;
+    return scalingOffset;
 }
 
 
 bool ParameterSetup::WriteOutDefocusSlices()
 {
-	return writeOutDefocusSlices;
+    return writeOutDefocusSlices;
 }
 
 
 unsigned int ParameterSetup::NumberOfInputStacks()
 {
-	return numberOfInputStacks;
+    return numberOfInputStacks;
 }
 
 string ParameterSetup::DefocusFile()
 {
-	return defocusFile;
+    return defocusFile;
 }
 
 string ParameterSetup::DefocusFileFormat()
 {
-	return defocusFileFormat;
+    return defocusFileFormat;
 }
 
 
 bool ParameterSetup::Use3DCTF()
 {
-	return use3DCTF;
+    return use3DCTF;
 }
 
 
 bool ParameterSetup::FilterProjections()
 {
-	return filterProjections;
+    return filterProjections;
 }
 string ParameterSetup::DefocusShiftFile()
 {
-	return defocusShiftFile;
+    return defocusShiftFile;
 }
 float ParameterSetup::DefocusStep()
 {
-	return defocusStep;
+    return defocusStep;
 }
 
 bool ParameterSetup::UseAdditionalShift()
 {
-	return useAdditionalShift;
+    return useAdditionalShift;
 }
 
 novaCTF::VolumeRotation ParameterSetup::StackOrientation()
 {
-	return stackOrientation;
+    return stackOrientation;
 }
 
 bool ParameterSetup::KeepFilesOpen()
 {
-	return keepFilesOpen;
+    return keepFilesOpen;
 }
 
 int ParameterSetup::Binning()
 {
-	return binning;
+    return binning;
 }
 
 float ParameterSetup::Amplitude()
 {
-	return amplitude;
+    return amplitude;
 }
 
 float ParameterSetup::Cs()
 {
-	return cs;
+    return cs;
 }
 
 float ParameterSetup::Evk()
 {
-	return evk;
+    return evk;
 }
 
 string ParameterSetup::CtfCorrectionType()
 {
-	return ctfCorrectionType;
+    return ctfCorrectionType;
 }
 
 float ParameterSetup::MemoryLimit()
 {
-	return memoryLimit;
+    return memoryLimit;
 }
 
 bool ParameterSetup::CorrectAstigmatism()
 {
-	return correctAstigmatism;
+    return correctAstigmatism;
 }
