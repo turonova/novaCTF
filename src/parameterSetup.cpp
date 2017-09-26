@@ -2,7 +2,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include "parameterSetup.h"
 #include <algorithm>
 
@@ -321,6 +321,11 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
     {
         defocusStep = atof(paramValue.c_str());
     }
+    else if(paramName == "FakeSIRTiterations")
+    {
+        fakeSirtIterations = atoi(paramValue.c_str());
+        useFakeSirtIterations=true;
+    }
     else
     {
         if(paramName!="")
@@ -375,6 +380,9 @@ void ParameterSetup::initVariables()
 
     xAxisTilt = 0.0f;
     outputMode = 2;
+
+    useFakeSirtIterations= false;
+
 }
 
 ParameterSetup::ParameterSetup(std::vector<string> argList)
@@ -596,7 +604,7 @@ float ParameterSetup::Evk()
     return evk;
 }
 
-string ParameterSetup::CtfCorrectionType()
+std::string ParameterSetup::CtfCorrectionType()
 {
     return ctfCorrectionType;
 }
@@ -609,4 +617,13 @@ float ParameterSetup::MemoryLimit()
 bool ParameterSetup::CorrectAstigmatism()
 {
     return correctAstigmatism;
+}
+
+bool ParameterSetup::UseFakeSirtIterations()
+{
+    return useFakeSirtIterations;
+}
+int ParameterSetup::FakeSirtIterations()
+{
+    return fakeSirtIterations;
 }

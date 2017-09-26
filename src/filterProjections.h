@@ -22,6 +22,8 @@ private:
 	void taperEndToStart(unsigned int projNumber);
 	void loadTiltAngles();
 
+	unsigned int computeSirtIterations();
+
 	MRCStack* inputStack;
 	ParameterSetup params;
 

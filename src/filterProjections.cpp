@@ -16,136 +16,136 @@ using namespace std;
 
 FilterProjections::FilterProjections(ParameterSetup& aParams)
 {
-	params=aParams;
-	inputStack = new MRCStack(params.InputStackName(),true,false, params.KeepFilesOpen());
+    params=aParams;
+    inputStack = new MRCStack(params.InputStackName(),true,false, params.KeepFilesOpen());
 }
 
 FilterProjections::~FilterProjections()
 {
-	delete inputStack;
+    delete inputStack;
 }
 
 void FilterProjections::run()
 {
-	initParameters();
-	filter();
+    initParameters();
+    filter();
 
-	VolumeIO::writeMRCStack(inputStack->getStackHeader(),filteredProjections,params.OutputFilename(),inputStack->getExtraData());
+    VolumeIO::writeMRCStack(inputStack->getStackHeader(),filteredProjections,params.OutputFilename(),inputStack->getExtraData());
 
 }
 
 void FilterProjections::loadTiltAngles()
 {
-	ifstream infile;
-	infile.open(params.TiltAnglesFilename().c_str());
+    ifstream infile;
+    infile.open(params.TiltAnglesFilename().c_str());
 
-	if (!infile.good())
-	{
-		throw ExceptionFileOpen(params.TiltAnglesFilename());
-	}
+    if (!infile.good())
+    {
+        throw ExceptionFileOpen(params.TiltAnglesFilename());
+    }
 
-	if(params.StackOrientation()==novaCTF::VolumeRotation::ALONG_XY)
-		numberOfAngles = inputStack->getResolution().z;
-	else
-		numberOfAngles = inputStack->getResolution().y;
+    if(params.StackOrientation()==novaCTF::VolumeRotation::ALONG_XY)
+        numberOfAngles = inputStack->getResolution().z;
+    else
+        numberOfAngles = inputStack->getResolution().y;
 
-	angles.resize(numberOfAngles);
+    angles.resize(numberOfAngles);
 
-	float degreesToRadiansFactor = M_PI/180.0;
+    float degreesToRadiansFactor = M_PI/180.0;
 
-	for(size_t i = 0; i<numberOfAngles;i++)
-	{
-		infile >>angles[i];
-		angles[i]=-degreesToRadiansFactor*(angles[i]);
-	}
+    for(size_t i = 0; i<numberOfAngles;i++)
+    {
+        infile >>angles[i];
+        angles[i]=-degreesToRadiansFactor*(angles[i]);
+    }
 
-	infile.close();
+    infile.close();
 }
 
 void FilterProjections::initParameters()
 {
-	projRes.x = (int) inputStack->getResolution().x;
-	projRes.y = (int) inputStack->getResolution().y;
-	projRes.z = (int) inputStack->getResolution().z;
+    projRes.x = (int) inputStack->getResolution().x;
+    projRes.y = (int) inputStack->getResolution().y;
+    projRes.z = (int) inputStack->getResolution().z;
 
-	// Set up padding: 10% of X size or minimum of 16, max of 50
-	npad = min(50, 2 * max(8, projRes.x / 20));
-	paddedResX=projRes.x+npad+2;				//2 is because of FFT routines here
+    // Set up padding: 10% of X size or minimum of 16, max of 50
+    npad = min(50, 2 * max(8, projRes.x / 20));
+    paddedResX=projRes.x+npad+2;				//2 is because of FFT routines here
 
-	loadTiltAngles();
+    loadTiltAngles();
 
-	// Set up radial weighting
-	int irmax;
-	int ifall;
+    // Set up radial weighting
+    int irmax;
+    int ifall;
 
-	if(params.UseRadialFilter())
-	{
-	  irmax=params.RadialCutOff();
-	  ifall=params.RadialFallOff();
-	  if(irmax==0)									//this is little bit weird - this can happen if cutoff is smaller than 0.5 due to int cast
-		  irmax=projRes.x*params.RadialCutOff();
+    if(params.UseRadialFilter())
+    {
+      irmax=params.RadialCutOff();
+      ifall=params.RadialFallOff();
+      if(irmax==0)									//this is little bit weird - this can happen if cutoff is smaller than 0.5 due to int cast
+          irmax=projRes.x*params.RadialCutOff();
 
-	  if(ifall==0)
-		  ifall=projRes.x*params.RadialFallOff();
-	}
-	else 							// Default radial weighting parameters - no smooth cut-off at the edges
-	{
-		irmax = inputStack->getResolution().x / 2 + 1;
-		ifall = 0.0;
-	}
+      if(ifall==0)
+          ifall=projRes.x*params.RadialFallOff();
+    }
+    else 							// Default radial weighting parameters - no smooth cut-off at the edges
+    {
+        irmax = inputStack->getResolution().x / 2 + 1;
+        ifall = 0.0;
+    }
 
-	radialWeighting(irmax, ifall);
+    radialWeighting(irmax, ifall);
 
 }
 
 // Main loop over slices perpendicular to tilt axis
 void FilterProjections::filter()
 {
-	filteredProjections.resize(projRes.z*projRes.y*projRes.x);
+    filteredProjections.resize(projRes.z*projRes.y*projRes.x);
 
-	inputStack->readAllProjections(&filteredProjections[0]);
+    inputStack->readAllProjections(&filteredProjections[0]);
 
-	for( int sliceNumber=0; sliceNumber<projRes.z; sliceNumber++)
-	{
-		currentRows.clear();
+    for( int sliceNumber=0; sliceNumber<projRes.z; sliceNumber++)
+    {
+        currentRows.clear();
 
-		for(int y=0; y< projRes.y; y++)
-		{
-			for(int x = 0; x < projRes.x; x++)
-			{
-				currentRows.push_back(filteredProjections[x+y*projRes.x+sliceNumber*projRes.x*projRes.y]);
-			}
-			taperEndToStart(y);
-		}
+        for(int y=0; y< projRes.y; y++)
+        {
+            for(int x = 0; x < projRes.x; x++)
+            {
+                currentRows.push_back(filteredProjections[x+y*projRes.x+sliceNumber*projRes.x*projRes.y]);
+            }
+            taperEndToStart(y);
+        }
 
-		transform();
+        transform();
 
-		for(int y=0; y< projRes.y; y++)
-		{
-			for(int x = 0; x < projRes.x; x++)
-				filteredProjections[x+y*projRes.x+sliceNumber*projRes.x*projRes.y]=currentRows[x+y*paddedResX];
-		}
-	}
+        for(int y=0; y< projRes.y; y++)
+        {
+            for(int x = 0; x < projRes.x; x++)
+                filteredProjections[x+y*projRes.x+sliceNumber*projRes.x*projRes.y]=currentRows[x+y*paddedResX];
+        }
+    }
 }
 
 void FilterProjections::transform()
 {
-	// Apply forward Fourier transform
-	FFTRoutines::many1DTransform(&currentRows[0],(int)projRes.x+(int)npad,(int)numberOfAngles,0);
+    // Apply forward Fourier transform
+    FFTRoutines::many1DTransform(&currentRows[0],(int)projRes.x+(int)npad,(int)numberOfAngles,0);
 
-	// Apply Radial weighting
-	int index = 0;
-	for(unsigned int nv=0;nv<numberOfAngles;nv++)
-	{
-		for(int i=0; i<paddedResX; i++)
-		{
-			currentRows[index]=currentRows[index]*radialFilter[index];
-			index++;
-		}
-	}
+    // Apply Radial weighting
+    int index = 0;
+    for(unsigned int nv=0;nv<numberOfAngles;nv++)
+    {
+        for(int i=0; i<paddedResX; i++)
+        {
+            currentRows[index]=currentRows[index]*radialFilter[index];
+            index++;
+        }
+    }
 
-	// Apply inverse transform
-	FFTRoutines::many1DTransform(&currentRows[0],projRes.x+npad,numberOfAngles,1);
+    // Apply inverse transform
+    FFTRoutines::many1DTransform(&currentRows[0],projRes.x+npad,numberOfAngles,1);
 }
 
 void FilterProjections::taperEndToStart(unsigned int projNumber)
@@ -183,23 +183,57 @@ void FilterProjections::taperEndToStart(unsigned int projNumber)
 
 }
 
+// Fake SIRT-like filter
+// All the values here correspond to the values from tilt routine
+// in IMOD package
+unsigned int FilterProjections::computeSirtIterations()
+{
+    int finalFakeSirtIterations = 0;
+
+    if(params.UseFakeSirtIterations())
+    {
+        if (params.FakeSirtIterations() <= 0)
+        {
+            finalFakeSirtIterations = 0;
+        }
+        else if (params.FakeSirtIterations() > 30)
+        {
+            finalFakeSirtIterations = 27 + 0.6 * (params.FakeSirtIterations() - 30);
+        }
+        else if(params.FakeSirtIterations() > 15)
+        {
+            finalFakeSirtIterations = 15 + 0.8 * (params.FakeSirtIterations() - 15);
+        }
+        else
+        {
+            finalFakeSirtIterations = params.FakeSirtIterations();
+        }
+    }
+
+    return (unsigned int)finalFakeSirtIterations;
+}
+
 // Set Radial Transform weighting
 // Linear ramp plus Gaussian fall off
 void FilterProjections::radialWeighting(float cutOff, float fallOff)
 {
-	std::vector<float> wincr;
-	wincr.push_back(2.0f);
-	wincr.push_back(1.0f/1.5f);
+    std::vector<float> wincr;
+    wincr.push_back(2.0f);
+    wincr.push_back(1.0f/1.5f);
 
-	std::vector<float> wgtAngles;
-	wgtAngles.resize(numberOfAngles);
+    std::vector<float> wgtAngles;
+    wgtAngles.resize(numberOfAngles);
 
-	for(unsigned int i=0; i<numberOfAngles;i++)
-	{
-		wgtAngles[i]=angles[i];
-	}
+    unsigned int fakeSirtIterations=computeSirtIterations();
 
+    //constant values for fake SIRT filter - ugly but corresponds to the tilt routine from IMOD
+    float fakeMatchAdd = 0.3f;
+    float fakeAlpha = 0.00195f;
 
+    for(unsigned int i=0; i<numberOfAngles;i++)
+    {
+        wgtAngles[i]=angles[i];
+    }
 
     std::vector<float> wgtAtten;
     wgtAtten.resize(numberOfAngles);
@@ -270,21 +304,29 @@ void FilterProjections::radialWeighting(float cutOff, float fallOff)
         attensum = attensum + atten;
 
 
-		for (int i = 0; i < min(irmax, iend); i++)
-		{
-			// Value 0.2 based on Kak & Slaney book
-			if (i == 0)
-			{
-				radialFilter.push_back(atten*0.2f);
-				radialFilter.push_back(atten*0.2f);
-			}
-			else
-			{
-				radialFilter.push_back(atten*i);
-				radialFilter.push_back(atten*i);
-			}
-		}
+        for (int i = 0; i < min(irmax, iend); i++)
+        {
+            float frequency = (float)(i) / (float)(paddedResX);
 
+            // Value 0.2 based on Kak & Slaney book
+            if (i == 0)
+            {
+                radialFilter.push_back(atten*0.2f);
+                radialFilter.push_back(atten*0.2f);
+            }
+            else if (params.UseFakeSirtIterations() && frequency >= fakeAlpha)
+            {
+                float fakeSirtValue=atten*i*(1.0f-pow((1.0f - fakeAlpha / frequency),(fakeSirtIterations + fakeMatchAdd)));
+                radialFilter.push_back(fakeSirtValue);
+                radialFilter.push_back(fakeSirtValue);
+            }
+            else
+            {
+                radialFilter.push_back(atten*i);
+                radialFilter.push_back(atten*i);
+            }
+
+        }
 
         for (int i = irmax; i < iend; i++)
         {
