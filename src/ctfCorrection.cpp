@@ -40,6 +40,8 @@ void CTFCorrection::correctCTF()
         correctedProjections[projIndex].resize(inputStack->getProjectionSize());
         inputStack->readProjections(&correctedProjections[projIndex][0],1,projIndex);
 
+        padProjection(correctedProjections[projIndex], inputStack->getResolution().x, inputStack->getResolution().y);
+
         computeCTF(ctfAmp,ctfFilter,defocusFileValues[projIndex][0],defocusFileValues[projIndex][1],defocusFileValues[projIndex][2],defocusFileValues[projIndex][3]);
 
         if(ctfCorrectionType=="phaseflip")
@@ -56,10 +58,128 @@ void CTFCorrection::correctCTF()
             else
                 FFTRoutines::complex2DTransform(arraySizeX,arraySizeY,correctedProjections[projIndex],ctfAmp);
         }
+
+        cropProjection(correctedProjections[projIndex], inputStack->getResolution().x, inputStack->getResolution().y);
     }
 
     VolumeIO::writeMRCStack(inputStack->getStackHeader(),correctedProjections,params.OutputFilename(),inputStack->getExtraData());
 
+}
+
+void CTFCorrection::padProjection(std::vector<float>& projection, size_t dimX, size_t dimY)
+{
+    // For squared images do nothing
+    if(dimX==dimY)
+        return;
+
+    // number of pixels used to compute start and end mean for row/column
+    unsigned int meanSize=10;
+
+    // For non-squared images take the larger dimension
+    size_t padDim=max(dimX,dimY);
+    size_t padStart=min(dimX,dimY);
+    size_t largeDim=max(dimX,dimY);
+    size_t smallDim=min(dimX,dimY);
+
+    bool padX;
+
+    if(largeDim==dimX)
+        padX=false;
+    else
+        padX=true;
+
+    std::vector<float> padProjection;
+    padProjection.resize(padDim*padDim);
+
+    for(size_t i=0; i<largeDim; i++)
+    {
+        float startMean=0;
+        float endMean=0;
+
+        size_t x = i;
+
+        for(size_t j=0; j<smallDim; j++)
+        {
+            size_t y=j;
+            if(padX)
+            {
+                x=j;
+                y=i;
+            }
+
+            if(j<meanSize)
+                startMean+=projection[x+y*dimX];
+
+            if(j>(smallDim-meanSize))
+                endMean+=projection[x+y*dimX];
+
+            padProjection[x+y*padDim]=projection[x+y*dimX];
+        }
+
+        startMean/=meanSize;
+        endMean/=meanSize;
+
+        unsigned int dist_counter=0;
+        for(size_t j=padStart; j<padDim; j++)
+        {
+            size_t y=j;
+            if(padX)
+            {
+               x=j;
+               y=i;
+            }
+
+            float dist=dist_counter/(padDim-padStart-1);
+            padProjection[x+y*padDim] = dist*startMean+(1.0f-dist)*endMean;
+            dist_counter++;
+        }
+    }
+
+    projection.resize(padDim*padDim);
+
+    std::copy(padProjection.begin(),padProjection.end(),projection.begin());
+}
+
+void CTFCorrection::cropProjection(std::vector<float>& projection, size_t dimX, size_t dimY)
+{
+    if(dimX==dimY)
+        return;
+
+    // For non-squared images take the larger dimension
+    size_t largeDim=max(dimX,dimY);
+    size_t smallDim=min(dimX,dimY);
+
+    std::vector<float> croppedProjection;
+    croppedProjection.resize(dimX*dimY);
+
+    bool padX;
+
+    if(largeDim==dimX)
+        padX=false;
+    else
+        padX=true;
+
+    for(size_t i=0; i<largeDim; i++)
+    {
+        size_t x=i;
+
+        for(size_t j=0; j<smallDim; j++)
+        {
+            size_t y=j;
+            if(padX)
+            {
+               x=j;
+               y=i;
+            }
+
+            croppedProjection[x+y*dimX]=projection[x+y*largeDim];
+        }
+
+    }
+
+    projection.resize(dimX*dimY);
+
+    std::copy(croppedProjection.begin(),croppedProjection.end(),projection.begin());
 }
 
 /* If astigmatism correction is required it performs check whether the values are available.
@@ -202,6 +322,13 @@ void CTFCorrection::computeFrequencyArray()
 {
     size_t resX=inputStack->getResolution().x;
     size_t resY=inputStack->getResolution().y;
+
+    // For non-squared images take the larger dimension
+    if(resX!=resY)
+    {
+        resX=max(resX,resY);
+        resY=max(resX,resY);
+    }
 
     std::vector<float> xArray;
     std::vector<float> yArray;
