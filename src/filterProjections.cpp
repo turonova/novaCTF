@@ -82,13 +82,13 @@ void FilterProjections::initParameters()
     {
       irmax=params.RadialCutOff();
       ifall=params.RadialFallOff();
-      if(irmax==0)									//this is little bit weird - this can happen if cutoff is smaller than 0.5 due to int cast
+      if(irmax==0)  //this is little bit weird - this can happen if cutoff is smaller than 0.5 due to int cast
           irmax=projRes.x*params.RadialCutOff();
 
       if(ifall==0)
           ifall=projRes.x*params.RadialFallOff();
     }
-    else 							// Default radial weighting parameters - no smooth cut-off at the edges
+    else    // Default radial weighting parameters - no smooth cut-off at the edges
     {
         irmax = inputStack->getResolution().x / 2 + 1;
         ifall = 0.0;

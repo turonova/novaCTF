@@ -404,7 +404,9 @@ ParameterSetup::ParameterSetup(std::vector<string> argList)
 
     if(!skipProjectionsList.empty())
     {
-        skipProjections = skipProjectionsList;
+        //skipProjections = skipProjectionsList;
+        cout << "WARNING: parameters EXCLUDELIST or EXCLUDELIST2 are currently not supported and will be ignored!" << endl;
+        cout << "Make sure that your input stack contains only the projections you want to use and that the tilt angle file and the defocus file have corresponding number and order of lines!" << endl;
     }
 
     if(binning!=0)
