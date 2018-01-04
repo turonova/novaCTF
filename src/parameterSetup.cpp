@@ -321,6 +321,11 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
     {
         defocusStep = atof(paramValue.c_str());
     }
+    else if(paramName == "UseInputEdgeFill")
+    {
+        useInputEdgeFill=true;
+        edgeFill = atof(paramValue.c_str());
+    }
     else if(paramName == "FakeSIRTiterations")
     {
         fakeSirtIterations = atoi(paramValue.c_str());
@@ -382,6 +387,8 @@ void ParameterSetup::initVariables()
     outputMode = 2;
 
     useFakeSirtIterations= false;
+
+    useInputEdgeFill = false;
 
 }
 
@@ -628,4 +635,13 @@ bool ParameterSetup::UseFakeSirtIterations()
 int ParameterSetup::FakeSirtIterations()
 {
     return fakeSirtIterations;
+}
+
+bool ParameterSetup::UseInputEdgeFill()
+{
+    return useInputEdgeFill;
+}
+float ParameterSetup::EdgeFill()
+{
+    return edgeFill;
 }

@@ -7,7 +7,7 @@ SOURCES := $(shell find $(IDIR) -name '*.cpp')
 
 CXX = g++ -O3 -s -DNDEBUG
 CXXFLAGS = -std=c++0x
-LDFLAGS = -lfftw3 -lfftw3f -L/usr/lib64   
+LDFLAGS = -L/usr/lib64 
 
 OBJECTS = $(SOURCES:.cpp=.o)
 
@@ -23,7 +23,7 @@ debug: ${program}
 ${program}: CXXFLAGS += $(foreach d, $(includepath), -I$d)
 ${program}: LDFLAGS += $(foreach d, $(libpath), -L$d)
 ${program}: $(OBJECTS)
-	$(CXX) $(LDFLAGS) -o $@ $^
+	$(CXX) -o $@ $^ $(LDFLAGS) -lfftw3 -lfftw3f
 
 clean:
 	rm -f src/*.o ${program} src/*.d

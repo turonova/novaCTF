@@ -146,8 +146,16 @@ void CTF3d::initVariables()
 
 	initAngles();
 
-	edgeFill = initialStack->getStackMean();
-	cout << "Using computed mean value: " << edgeFill << endl;
+	if(params.UseInputEdgeFill())
+	{
+	    edgeFill=params.EdgeFill();
+	    cout << "Using input mean value: " << edgeFill << endl;
+	}
+	else
+	{
+	    edgeFill = initialStack->getStackMean();
+	    cout << "Using computed mean value: " << edgeFill << endl;
+	}
 
     globalMin = FLT_MAX;
     globalMax = -FLT_MAX;

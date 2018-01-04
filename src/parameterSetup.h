@@ -73,8 +73,10 @@ class ParameterSetup
     bool UseFakeSirtIterations();
     int FakeSirtIterations();
 
+    bool UseInputEdgeFill();
+    float EdgeFill();
 
-    private:
+private:
 
     void initVariables();
 
@@ -149,4 +151,7 @@ class ParameterSetup
 
     bool useFakeSirtIterations;
     int fakeSirtIterations;
+
+    bool useInputEdgeFill;
+    float edgeFill;
 };
