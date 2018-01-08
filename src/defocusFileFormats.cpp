@@ -153,8 +153,8 @@ void CTFFind4::writeWithShiftedDefocii(std::vector<std::vector<float>>& newValue
     file.close();
 }
 
-    int ImodCTFPlotter::parseHeader(ifstream& infile)
-    {
+int ImodCTFPlotter::parseHeader(ifstream& infile)
+{
     std::string line;
     getline(infile,line);
     originalHeader=line;
@@ -213,7 +213,6 @@ void CTFFind4::writeWithShiftedDefocii(std::vector<std::vector<float>>& newValue
     //the first row - it contains specification of values that were used
     if(numberOfValues==6 && headerValues[numberOfValues-1]==3)
     {
-        infile.seekg(0,infile.beg);
         containsHeader=true;
         if(headerValues[0]==16)
         {
