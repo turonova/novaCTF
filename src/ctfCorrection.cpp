@@ -195,7 +195,7 @@ void CTFCorrection::checkAstigmatism()
 
     for(unsigned int i=0; i<defocusFileValues.size(); i++)
     {
-        diff= diff+(defocusFileValues[i][0]-defocusFileValues[i][1]);
+        diff= diff+fabs(defocusFileValues[i][0]-defocusFileValues[i][1]);
     }
 
     if(diff<0.0001)
