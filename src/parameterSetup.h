@@ -79,6 +79,7 @@ class ParameterSetup
 private:
 
     void initVariables();
+    void initSetFlags();
 
     void parseComFile(const string tiltcom);
     void parseCommandLine(vector<string> argList);
@@ -154,4 +155,7 @@ private:
 
     bool useInputEdgeFill;
     float edgeFill;
+
+    //flags for setting mandatory parameters
+    bool setPixelSize;
 };

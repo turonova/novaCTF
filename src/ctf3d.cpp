@@ -88,9 +88,15 @@ void CTF3d::prepareCTF()
 	}
 
 	if(params.DefocusStep()!=0.0f)
+	{
 		numberOfStacks = microscopeGeometry->computeNumberOfParts(params.DefocusStep(),params.PixelSize(),params.VolumeThicknessType());
+		cout << "Number of input stacks based on DefocusStep, PixelSize and volume thickness (THICKNESS) is: " << numberOfStacks << endl;
+	}
 	else if(params.NumberOfInputStacks()!=0)
+	{
 		numberOfStacks = params.NumberOfInputStacks();
+		cout << "Number of input stacks based on NumberOfInputStacks is: " <<  numberOfStacks << endl;
+	}
 	else
 	{
 		cout << "Either defocus step size (DefocusStep in nm) or number of input stacks (NumberOfInputStacks) has to be specified!" << endl;

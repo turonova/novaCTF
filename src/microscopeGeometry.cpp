@@ -104,15 +104,15 @@
 					Vec3f cornerBL = mSetup.c_bBoxMinComplete;
 					Vec3f cornerBR = mSetup.c_bBoxMinComplete;
 					Vec3f cornerTL = mSetup.c_bBoxMinComplete;
-					cornerTL.z=-cornerTL.z;
-					cornerBR.x=-cornerBR.x;
+					cornerTL.z=cornerTR.z;  // cortneTL.z=-cornerTL.z is incorrect in case the z-shift is not zero!!!
+					cornerBR.x=cornerTR.x;
 					rotate(cornerTR,maxTiltAngleInDegrees);
 					rotate(cornerBL,maxTiltAngleInDegrees);
 					rotate(cornerBR,maxTiltAngleInDegrees);
 					rotate(cornerTL,maxTiltAngleInDegrees);
 					float maxZ=max(cornerTR.z,max(cornerBL.z,max(cornerBR.z,cornerTL.z)));
 					float minZ=min(cornerTR.z,min(cornerBL.z,min(cornerBR.z,cornerTL.z)));
-					maxDifferenceInZ = max(maxDifferenceInZ,maxZ-minZ);
+					maxDifferenceInZ = max(maxDifferenceInZ,fabs(maxZ-minZ));
 				}
 
 				return maxDifferenceInZ;

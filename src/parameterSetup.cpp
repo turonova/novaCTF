@@ -257,6 +257,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
     else if(paramName == "PixelSize")
     {
         pixelSize = atof(paramValue.c_str());
+        setPixelSize=true;
     }
     else if(paramName=="Use3DCTF")
     {
@@ -392,9 +393,16 @@ void ParameterSetup::initVariables()
 
 }
 
+void ParameterSetup::initSetFlags()
+{
+    setPixelSize = false;
+}
+
 ParameterSetup::ParameterSetup(std::vector<string> argList)
 {
     initVariables();
+    initSetFlags();
+
 
     //check if tilt.com is among the parameters and if so parse it first - the command line parameters have more priority and can later on change any parameters set by tilt.com
     for(std::vector<string>::iterator it=argList.begin(); it!=argList.end();it++)
@@ -523,6 +531,12 @@ float ParameterSetup::Scaling()
 
 float ParameterSetup::PixelSize()
 {
+    if(!setPixelSize)
+    {
+        cout << "PixelSize (in nm) has to be set!" << endl << endl;
+        exit(EXIT_FAILURE);
+    }
+
     return pixelSize;
 }
 
