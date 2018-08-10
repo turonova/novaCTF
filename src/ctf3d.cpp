@@ -22,7 +22,7 @@ CTF3d::CTF3d(ParameterSetup& aParams)
 	initialStack = new MRCStack(firstFileName,true,true,false);
 
 	projSet->init(initialStack->getNumberOfProjections());
-	microscopeGeometry = new Geometry(*initialStack,params.VolumeDimensions(),params.TiltAnglesFilename(),params.XAxisTilt(), params.ZShift());
+	microscopeGeometry = new Geometry(*initialStack,params.VolumeDimensions(),params.TiltAnglesFilename(),params.XAxisTilt(), params.ZShift(),params.Offset().x);
 }
 
 CTF3d::~CTF3d()

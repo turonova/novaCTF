@@ -156,8 +156,8 @@ void FilterProjections::taperEndToStart(unsigned int projNumber)
 
     for(int ix=0; ix<=min(2,(int)projRes.x-1); ix++)
     {
-    	nsum++;
-    	xsum+=currentRows[projOffset+ix];
+        nsum++;
+        xsum+=currentRows[projOffset+ix];
     }
     float stmean=xsum/(float)nsum;
 
@@ -166,8 +166,8 @@ void FilterProjections::taperEndToStart(unsigned int projNumber)
 
     for(int ix=max(0,(int)(projRes.x-3)); ix<=(int)(projRes.x-1);ix++)
     {
-    	nsum++;
-    	xsum+=currentRows[projOffset+ix];
+        nsum++;
+        xsum+=currentRows[projOffset+ix];
     }
 
     float endmean=xsum/(float)nsum;
@@ -298,7 +298,7 @@ void FilterProjections::radialWeighting(float cutOff, float fallOff)
                     atten = wgtAtten[iw];
                 }
             }
-            cout<< "angle: " << angles[iv] << ", atten: " << atten << endl;
+            //cout<< "angle: " << angles[iv] << ", atten: " << atten << endl;
 
         }
         attensum = attensum + atten;
@@ -319,6 +319,11 @@ void FilterProjections::radialWeighting(float cutOff, float fallOff)
                 float fakeSirtValue=atten*i*(1.0f-pow((1.0f - fakeAlpha / frequency),(fakeSirtIterations + fakeMatchAdd)));
                 radialFilter.push_back(fakeSirtValue);
                 radialFilter.push_back(fakeSirtValue);
+            }
+            else if(params.UseSteepRampFilter())
+            {
+                radialFilter.push_back(atten*(2*i-1));
+                radialFilter.push_back(atten*2*i);
             }
             else
             {
@@ -347,8 +352,8 @@ void FilterProjections::radialWeighting(float cutOff, float fallOff)
         for (unsigned int iv = 0; iv < numberOfAngles; iv++)
         {
             int radInd = ibase + 2 * irmax-1;
-        	float radValue = radialFilter[radInd];
-        	float z = atten*radValue;
+            float radValue = radialFilter[radInd];
+            float z = atten*radValue;
             radialFilter[ibase + 2 * i] = z;
             radialFilter[ibase + 2 * i+1] = z;
             ibase = ibase + paddedResX;

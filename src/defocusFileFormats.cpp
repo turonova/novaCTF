@@ -13,6 +13,8 @@ DefocusFileFormat* DefocusFileFormat::createFileFormat(string fileFormatName)
         return new ImodCTFPlotter;
     else if(fileFormatName=="ctffind4")
         return new CTFFind4;
+    else if (fileFormatName=="gctf")
+        return new GCTF;
     else
     {
         cout << "The following defocus file format is unknown: " << fileFormatName << std::endl;
@@ -448,3 +450,209 @@ void ImodCTFPlotter::getValues(std::vector<std::vector<float>>& values, Projecti
         }
     }
 }
+
+
+/* Assuming format from GCTF:
+ * 1 line: empty
+ * 2 line: "data_"
+ * 3 line: empty
+ * 4 line: "loop_"
+ * 5 - xxx lines: column description in the format _rlnXXX #columnNumber
+ * xxx+1 - end: each line contains xxx-5 columns with relevant values
+ */
+void GCTF::read(string fileName, ProjectionSet& projSet)
+{
+    ifstream infile;
+    infile.open(fileName.c_str());
+
+    if (!infile.good())
+    {
+        throw ExceptionFileOpen(fileName.c_str());
+    }
+
+    parseAndSaveHeader(infile);
+
+    originalValues.resize(projSet.getSize());
+
+    for(ProjectionSet::iterator it=projSet.begin(); it!=projSet.end(); it++)
+    {
+        unsigned int projIndex = it.second();
+
+        for(unsigned int i=0; i<numberOfColumns; i++)
+        {
+            std::string value;
+            infile >> value;
+            originalValues[projIndex].push_back(value);
+        }
+    }
+
+    infile.close();
+}
+
+void GCTF::getValues(std::vector<std::vector<float>>& values, ProjectionSet& projSet, std::string units)
+{
+    double conversionFactor=1.0f;
+
+    if(units=="nanometers")
+    {
+        conversionFactor=10e-2;
+    }
+    else if(units=="microns")
+    {
+        conversionFactor=10e-5;
+    }
+
+    for(ProjectionSet::iterator it=projSet.begin(); it!=projSet.end(); it++)
+    {
+        unsigned int projIndex = it.second();
+
+        values[projIndex].push_back(atof(originalValues[projIndex][columnIndices[0]].c_str())*conversionFactor);     //defocus #1
+        values[projIndex].push_back(atof(originalValues[projIndex][columnIndices[1]].c_str())*conversionFactor);     //defocus #2
+        values[projIndex].push_back(atof(originalValues[projIndex][columnIndices[2]].c_str()));                      //azimuth of astigmatism in degrees
+
+        if(containsPhaseShift)
+            values[projIndex].push_back(degreesToRadians(atof(originalValues[projIndex][columnIndices[3]].c_str())));   //phase shift in degrees
+        else
+            values[projIndex].push_back(0.0f);
+    }
+}
+
+
+void GCTF::writeWithShiftedDefocii(std::vector<std::vector<float>>& newValues, string fileName, ProjectionSet& projSet, std::string units)
+{
+    ofstream file;
+    file.open(fileName.c_str());
+
+    if (!file.good())
+    {
+        throw ExceptionFileOpen(fileName.c_str());
+    }
+
+    double conversionFactor = 1.0;
+    if(units=="nanometers")
+    {
+        conversionFactor=10.0;
+    }
+    else if(units=="microns")
+    {
+        conversionFactor=1.0e4;
+    }
+
+    for(unsigned int i=0; i<originalHeader.size(); i++)
+    {
+        file << originalHeader[i] << "\n";
+    }
+
+    unsigned int firstStop,secondStop;
+    unsigned int firstDef,secondDef;
+
+    if(columnIndices[0]<columnIndices[1])
+    {
+        firstStop=columnIndices[0];
+        firstDef=0;
+        secondStop=columnIndices[1];
+        secondDef=1;
+    }
+    else
+    {
+       firstStop=columnIndices[1];
+       firstDef=1;
+       secondStop=columnIndices[0];
+       secondDef=0;
+    }
+
+
+    for(ProjectionSet::iterator it=projSet.begin(); it!=projSet.end(); it++)
+    {
+        unsigned int projIndex = it.second();
+
+        // Change both defocus values in the file (it does not matter if we correct for astigmatism or not, the shifted
+        // values are always computed for both defocii in the file and written out to avoid confusions
+        for(unsigned int j=0; j<firstStop; j++)
+        {
+            file << originalValues[projIndex][j];
+            file << "\t";
+        }
+
+        file << std::setprecision(6) << std::fixed << newValues[projIndex][firstDef]*conversionFactor;
+        file << "\t";
+
+        for(unsigned int j=firstStop+1; j<secondStop; j++)
+        {
+            file << originalValues[projIndex][j];
+            file << "\t";
+        }
+
+        file << std::setprecision(6) << std::fixed << newValues[projIndex][secondDef]*conversionFactor;
+
+        for(unsigned int j=secondStop+1; j<numberOfColumns; j++)
+        {
+            file << "\t";
+            file << originalValues[projIndex][j];
+        }
+
+        file << "\n";
+    }
+
+    file << "\n";
+    file.close();
+}
+
+void GCTF::parseAndSaveHeader(ifstream& infile)
+{
+    std::string line;
+
+    numberOfColumns = 0;
+    columnIndices.resize(4);
+
+    std::streampos startingPositionForValues;
+
+    containsPhaseShift = false;
+    bool paramsStarted=false;
+
+    while(getline(infile,line))
+    {
+        // check if the line contains column information
+        std::size_t found = line.find("_rln");
+
+        if(found!=std::string::npos)
+        {
+            numberOfColumns++;
+            paramsStarted = true;
+
+            startingPositionForValues=infile.tellg();
+
+            std::string paramName=line.substr(0, line.find(" "));
+            unsigned int columnNumber=atoi(line.substr(line.find("#")+1, line.length()).c_str());
+
+            // store column indices of relevant parameters
+            if(paramName=="_rlnDefocusU")
+            {
+                columnIndices[0]=columnNumber-1;
+            }
+            else if(paramName=="_rlnDefocusV")
+            {
+                columnIndices[1]=columnNumber-1;
+            }
+            else if(paramName=="_rlnDefocusAngle")
+            {
+                columnIndices[2]=columnNumber-1;
+            }
+            else if(paramName=="_rlnPhaseShift")
+            {
+                columnIndices[3]=columnNumber-1;
+                containsPhaseShift = true;
+            }
+        }
+        else if(paramsStarted) //all parameters were read
+        {
+            break;
+        }
+
+        // store the line to be able to recreate the file later on
+        originalHeader.push_back(line);
+    }
+
+    infile.seekg(startingPositionForValues);
+}
+

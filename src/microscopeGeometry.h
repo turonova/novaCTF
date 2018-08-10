@@ -37,7 +37,7 @@ public:
 	GeometrySetup mSetup;		//geometry setup
 
 	//Geometry(MRCStack& aProjData,Volume& aVolume, string aTiltAnglesFileName, float aXAxisTiltAngle, Vec2f zShift);
-	Geometry(MRCStack& aProjData,novaCTF::Vec3ui volumeResolution, string aTiltAnglesFileName, float aXAxisTiltAngle, Vec2f zShift);
+	Geometry(MRCStack& aProjData,novaCTF::Vec3ui volumeResolution, string aTiltAnglesFileName, float aXAxisTiltAngle, Vec2f zShift,float additionalTilt);
 
 	~Geometry();
 
@@ -58,8 +58,10 @@ private:
 
 		void rotate(novaCTF::Vec3f &aCoord, float aTiltAngle);
 		void setVolumeGeometry(novaCTF::Vec3ui volumeResolution);
-		void loadTiltAngles(string aTiltAnglesFileName);
+		void loadTiltAngles(string aTiltAnglesFileName,float additionalTilt);
 		unsigned int getDefocusID(std::vector<novaCTF::Vec4f>& focusGrid, Vec2f point);
 		novaCTF::Vec2f projectPointOnDetector(Vec3f point);
+
+		float pretilt;
 
 };

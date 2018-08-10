@@ -19,7 +19,7 @@ Defocus::Defocus(ParameterSetup& aParams)
 	projSet = new ProjectionSetIdentity();
 	inputStack = new MRCStack(params.InputStackName(),false, false, false);
 	projSet->init(inputStack->getNumberOfProjections());
-	microscopeGeometry = new Geometry(*inputStack,params.VolumeDimensions(),params.TiltAnglesFilename(),params.XAxisTilt(),params.ZShift());
+	microscopeGeometry = new Geometry(*inputStack,params.VolumeDimensions(),params.TiltAnglesFilename(),params.XAxisTilt(),params.ZShift(),params.Offset().x);
 	defocusFileFormat = params.DefocusFileFormat();
 }
 

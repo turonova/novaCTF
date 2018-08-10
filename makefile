@@ -6,8 +6,8 @@ program=novaCTF
 SOURCES := $(shell find $(IDIR) -name '*.cpp')
 
 CXX = g++ -O3 -s -DNDEBUG
-CXXFLAGS = -std=c++0x
-LDFLAGS = -L/usr/lib64 
+CXXFLAGS = -std=c++14
+LDFLAGS =  
 
 OBJECTS = $(SOURCES:.cpp=.o)
 

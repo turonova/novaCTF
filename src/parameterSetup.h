@@ -76,6 +76,7 @@ class ParameterSetup
     bool UseInputEdgeFill();
     float EdgeFill();
 
+    bool UseSteepRampFilter();
 private:
 
     void initVariables();
@@ -155,6 +156,8 @@ private:
 
     bool useInputEdgeFill;
     float edgeFill;
+
+    bool useSteepRampFilter;
 
     //flags for setting mandatory parameters
     bool setPixelSize;

@@ -251,7 +251,7 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
     else if(paramName == "DefocusFileFormat")
     {
         defocusFileFormat =  removeEmptySpacesFromString(paramValue.c_str());
-        if(defocusFileFormat!="ctffind4" && defocusFileFormat!="imod")
+        if(defocusFileFormat!="ctffind4" && defocusFileFormat!="imod"  && defocusFileFormat!="gctf")
             cout << "Unknown type of defocus file format: " << defocusFileFormat << endl;
     }
     else if(paramName == "PixelSize")
@@ -332,6 +332,10 @@ void ParameterSetup::storeValues(string paramName, string paramValue, char separ
         fakeSirtIterations = atoi(paramValue.c_str());
         useFakeSirtIterations=true;
     }
+    else if(paramName == "UseSteepRampFilter")
+    {
+        useSteepRampFilter=atoi(paramValue.c_str());
+    }
     else
     {
         if(paramName!="")
@@ -390,6 +394,8 @@ void ParameterSetup::initVariables()
     useFakeSirtIterations= false;
 
     useInputEdgeFill = false;
+
+    useSteepRampFilter= false;
 
 }
 
@@ -658,4 +664,9 @@ bool ParameterSetup::UseInputEdgeFill()
 float ParameterSetup::EdgeFill()
 {
     return edgeFill;
+}
+
+bool ParameterSetup::UseSteepRampFilter()
+{
+    return useSteepRampFilter;
 }
