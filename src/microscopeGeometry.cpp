@@ -25,7 +25,7 @@
 
             //load tilt angles from given file
             mTiltAngles.resize(header->mDepth);
-            loadTiltAngles(aTiltAnglesFileName,additionalTilt);
+            loadTiltAngles(aTiltAnglesFileName);
 
             pretilt=additionalTilt;
 
@@ -251,7 +251,7 @@
         }
 
 
-        void Geometry::loadTiltAngles(string aTiltAnglesFileName,float additionalTilt)
+        void Geometry::loadTiltAngles(string aTiltAnglesFileName)
         {
             ifstream infile;
             infile.open(aTiltAnglesFileName.c_str());

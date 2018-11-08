@@ -58,7 +58,7 @@ private:
 
 		void rotate(novaCTF::Vec3f &aCoord, float aTiltAngle);
 		void setVolumeGeometry(novaCTF::Vec3ui volumeResolution);
-		void loadTiltAngles(string aTiltAnglesFileName,float additionalTilt);
+		void loadTiltAngles(string aTiltAnglesFileName);
 		unsigned int getDefocusID(std::vector<novaCTF::Vec4f>& focusGrid, Vec2f point);
 		novaCTF::Vec2f projectPointOnDetector(Vec3f point);
 

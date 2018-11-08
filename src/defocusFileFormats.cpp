@@ -162,27 +162,16 @@ int ImodCTFPlotter::parseHeader(ifstream& infile)
     originalHeader=line;
 
     std::vector<float> headerValues;
-    unsigned int stringStart = 0;
 
-    //parse first line and store values in floats
-    for(unsigned int i = 0; i < line.length(); i++)
+    stringstream sline;
+    sline.str(line);
+
+    while(!sline.eof())
     {
-        if(line[i]==' ')
-        {
-            string value = line.substr(stringStart, i);
-
-            //skip over spaces
-            while(line[i]==' ')
-                i++;
-
-            stringStart=i;
-            headerValues.push_back(atof(value.c_str()));
-        }
+        float value;
+        sline >> value;
+        headerValues.push_back(value);
     }
-
-    // last value on the line
-    string value = line.substr(stringStart, line.length());
-    headerValues.push_back(atof(value.c_str()));
 
     unsigned int numberOfValues=headerValues.size();
 
